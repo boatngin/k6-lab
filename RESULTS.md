@@ -9,7 +9,7 @@ Run on 8 November 2026 with k6 v2.3.0 from macOS (Apple Silicon) against https:/
 - Step 0.3: exactly 20 iterations, 20 requests, finished in 5.9 s, p(95) = 342.55 ms.
 - Step 0.4: all 3 checks passed (status 200, pizza has a name, every ingredient is vegetarian), 313.58 ms.
 - Step 0.5: the request without a token got 401, the check passed and `http_req_failed` stayed at 0.00 % thanks to `http.expectedStatuses(401)`.
-- Step 0.6, exit code of the normal run and of the run with P95=300:
+- Step 0.6, exit code of the normal run and of the run with P95=300: normal run **exit code 0** (p(95) = 442.76 ms < 1500 ms, all thresholds ✓). With `-e P95=300` the p(95) rule failed (p(95) = 415.66 ms > 300 ms), K6 printed "thresholds on metrics 'http_req_duration' have been crossed" and the **exit code was 99**.
 - Step 0.7, rules that passed, p(95), p(99), exit code after your change:
 - Step 0.8, what was wrong, and how the checks showed it:
 
