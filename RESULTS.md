@@ -29,12 +29,27 @@ All group thresholds passed in A2 to A5 (home p(95) ≈ 384–421 ms < 1000 ms, 
 HTML reports: `reports/a2-average.html`, `reports/a3-stress.html`, `reports/a4-spike.html`, `reports/a5-soak.html`.
 
 ## Part B
-1.
-2.
-3.
-4.
-5.
-6.
-7.
-8.
-9.
+1. See the results table above.
+2. Each virtual user runs its iterations one after another, and each iteration is one request (~0.3 s) plus `sleep(1)`, about 1.35 s. So one VU sends at most ≈ 0.74 req/s and 5 VUs ≈ 3.7 req/s (measured 3.69 req/s). The think time limits the rate, not the server.
+3. No. The overall p(95) was 436.82 ms at 3 users and 429.66 ms at 5 users, which is the same within normal network noise (the recommendation p(95) went from 446.5 ms to 449.73 ms). The request rate went up from 1.28 to 2.13 req/s, but the response time did not grow. Only the max rose once to 1.01 s, a single outlier. In terms of the operational envelope, 5 users at about 2 req/s are far inside the envelope of QuickPizza, a service built to be shared by many K6 learners at once. Our "stress" test is only stress compared with our own average load, not compared with the system's capacity, so we never came near the edge where response times start to rise or errors appear.
+4. In the 10-second snapshots of `reports/a4-spike.html`, the p(95) during the baseline at 1 user was about 318–360 ms. During the spike at 5 users it rose slightly to about 364–394 ms. In the first 10-second window after dropping back to 1 user it was already back to about 335 ms and then 308 ms. So the rise was small (≈ 30–40 ms, within network noise) and the response time returned to its earlier level within one snapshot, **about 10 seconds**, i.e. right away. No requests failed.
+5. No. In `reports/a5-soak.html` the p(95) in the first minutes was about 290–395 ms and in the last minutes about 285–367 ms, so it did not get worse. The error rate stayed at 0.00 % for all 633 requests and all 844 checks passed. There were two short outliers in the middle of the run (max 955 ms and 911 ms in single 10-second windows), which went away immediately and do not form a trend. A soak test of several hours could reveal a **memory leak** (memory grows slowly until the process slows down from garbage collection or crashes), and also exhaustion of resources such as database connections, file handles or disk space from growing logs.
+6. An average hides the slowest users. A few very slow requests barely move the average when most requests are fast, but those users still have a bad experience. The p(95) says that 95 % of requests were faster than this value, so it directly describes the experience of nearly every user, including the slow tail. In our A3 run the average was 340 ms but the max was 1.01 s; the p(95) of 430 ms is a fairer promise than the average.
+7. (a) **Network distance and noise**: our requests travel over the public internet from Thailand to Grafana's servers, so most of the ~270–450 ms is network latency and TLS that varies with routing and the home connection; in a lab the client sits next to the server and the times would be much lower and more stable. (b) **Shared, unknown load and hardware**: QuickPizza is used at the same time by people all over the world, and runs on cloud hardware with possible caching, CDN and autoscaling that we do not control, so other users' traffic changes our numbers; a lab system has known hardware, configuration and only our load. (Also: the load generator itself, a laptop on Wi-Fi, could be the bottleneck.)
+8. Because it is effectively a denial-of-service attack. Hundreds of users can slow down or crash the site for its real users, cost the owner money, and may break the law and the provider's terms of service. Only the owner can agree to that risk, so load testing requires written permission. On a site you own you can also watch the server side and stop the test safely.
+9. Vague requirement (LINE chat app): "Sending a message should be fast, even when many people are using the app."
+   Testable requirement: "With 200 concurrent users each sending one message every 5 seconds for 10 minutes, the send-message API answers 95 % of requests within 500 ms and 99 % within 1 s, fewer than 0.1 % of requests fail, and more than 99.9 % of messages are confirmed as delivered."
+   ```js
+   export const options = {
+     stages: [
+       { duration: '1m', target: 200 },
+       { duration: '10m', target: 200 },
+       { duration: '1m', target: 0 },
+     ],
+     thresholds: {
+       'http_req_duration{name:send-message}': ['p(95)<500', 'p(99)<1000'],
+       http_req_failed: ['rate<0.001'],
+       checks: ['rate>0.999'], // check: 'message is delivered'
+     },
+   };
+   ```
