@@ -23,7 +23,10 @@ Run on 8 November 2026 with k6 v2.3.0 from macOS (Apple Silicon) against https:/
 | A2   | Average load | 3     | 1.28  | 436.82 ms | 619.36 ms | 0.00 % | 100.00 % (312/312) |
 | A3   | Stress       | 5     | 2.13  | 429.66 ms | 1.01 s    | 0.00 % | 100.00 % (512/512) |
 | A4   | Spike        | 5     | 1.04  | 437.12 ms | 480.68 ms | 0.00 % | 100.00 % (196/196) |
-| A5   | Soak         | 2     |       |       |     |        |        |
+| A5   | Soak         | 2     | 0.96  | 431.29 ms | 1.11 s    | 0.00 % | 100.00 % (844/844) |
+
+All group thresholds passed in A2 to A5 (home p(95) ≈ 384–421 ms < 1000 ms, recommendation p(95) ≈ 440–450 ms < 1500 ms). The A1 smoke test had only 15 requests, so its p(95) is driven by one or two slow requests (the first one includes the TLS handshake).
+HTML reports: `reports/a2-average.html`, `reports/a3-stress.html`, `reports/a4-spike.html`, `reports/a5-soak.html`.
 
 ## Part B
 1.
