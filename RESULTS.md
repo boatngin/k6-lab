@@ -19,7 +19,7 @@ Run on 8 November 2026 with k6 v2.3.0 from macOS (Apple Silicon) against https:/
 ## Part A results
 | Step | Test type    | Users | Req/s | p(95)     | Max     | Failed | Checks              |
 | ---- | ------------ | ----- | ----- | --------- | ------- | ------ | ------------------- |
-| A1   | Smoke        | 1     |       |       |     |        |        |
+| A1   | Smoke        | 1     | 0.49  | 560.54 ms | 767.86 ms | 0.00 % | 100.00 % (20/20)  |
 | A2   | Average load | 3     |       |       |     |        |        |
 | A3   | Stress       | 5     |       |       |     |        |        |
 | A4   | Spike        | 5     |       |       |     |        |        |
